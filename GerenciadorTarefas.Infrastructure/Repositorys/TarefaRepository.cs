@@ -1,6 +1,7 @@
 using GerenciadorTarefas.Domain.Entities;
 using GerenciadorTarefas.Domain.Interfaces.Repository;
 using GerenciadorTarefas.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace GerenciadorTarefas.Infrastructure.Repositorys
 {
@@ -19,24 +20,29 @@ namespace GerenciadorTarefas.Infrastructure.Repositorys
             return tarefa.Id;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Tarefa tarefa)
         {
-            throw new NotImplementedException();
+            if (tarefa == null)
+            {
+                return false;
+            }
+            _context.Tarefas.Remove(tarefa);
+            return true;
+        }
+        public async Task<IEnumerable<Tarefa>> GetAllAsync()
+        {
+            return await _context.Tarefas.ToListAsync();
         }
 
-        public Task<IEnumerable<Tarefa>> GetAllAsync()
+        public async Task<Tarefa> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Tarefas.FindAsync(id);
         }
 
-        public Task<Tarefa> GetByIdAsync(int id)
+        public async Task<bool> UpdateAsync(Tarefa tarefa)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateAsync(Tarefa tarefa)
-        {
-            throw new NotImplementedException();
+            _context.Tarefas.Update(tarefa);
+            return true;
         }
     }
 }
