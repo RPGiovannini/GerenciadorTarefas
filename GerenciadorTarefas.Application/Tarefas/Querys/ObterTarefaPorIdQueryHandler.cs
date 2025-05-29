@@ -1,4 +1,6 @@
+using System.Net;
 using GerenciadorTarefas.Domain.Entities;
+using GerenciadorTarefas.Domain.Exceptions;
 using GerenciadorTarefas.Domain.Interfaces.Repository;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -25,7 +27,7 @@ namespace GerenciadorTarefas.Application.Tarefas.Querys
                 if (tarefa == null)
                 {
                     _logger.LogWarning($"Tarefa com ID {request.Id} não foi encontrada");
-                    throw new InvalidOperationException($"Tarefa com ID {request.Id} não foi encontrada");
+                    throw new CustomException(HttpStatusCode.NotFound, $"Tarefa com ID {request.Id} não foi encontrada", new HttpRequestException());
                 }
                 return tarefa;
             }

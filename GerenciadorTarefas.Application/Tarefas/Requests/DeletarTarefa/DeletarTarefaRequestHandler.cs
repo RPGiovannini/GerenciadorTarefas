@@ -1,3 +1,5 @@
+using System.Net;
+using GerenciadorTarefas.Domain.Exceptions;
 using GerenciadorTarefas.Domain.Interfaces.Repository;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -22,7 +24,7 @@ namespace GerenciadorTarefas.Application.Tarefas.Requests.DeletarTarefa
                 if (tarefa == null)
                 {
                     _logger.LogWarning($"Tarefa não encontrada: {request.Id}");
-                    throw new InvalidOperationException($"Tarefa não encontrada: {request.Id}");
+                    throw new CustomException(HttpStatusCode.NotFound, $"Tarefa não encontrada: {request.Id}", new HttpRequestException());
                 }
                 await _unitOfWork.TarefaRepository.DeleteAsync(tarefa);
                 await _unitOfWork.Commit();

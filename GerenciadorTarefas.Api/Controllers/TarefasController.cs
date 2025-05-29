@@ -1,7 +1,9 @@
+using System.Linq.Expressions;
 using GerenciadorTarefas.Application.Tarefas.Querys;
 using GerenciadorTarefas.Application.Tarefas.Requests.AtualizarTarefa;
 using GerenciadorTarefas.Application.Tarefas.Requests.CriarTarefa;
 using GerenciadorTarefas.Application.Tarefas.Requests.DeletarTarefa;
+using GerenciadorTarefas.Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -42,7 +44,7 @@ namespace GerenciadorTarefas.Api.Controllers
             {
                 var result = await _mediator.Send(request);
                 //apenas para lembrar de passar o getId quando criar
-                return CreatedAtAction(nameof(CriarTarefa), new { id = result }, result);
+                return CreatedAtAction(nameof(ObterTarefa), new { id = result }, result);
             }
             catch (Exception ex)
             {
@@ -90,6 +92,10 @@ namespace GerenciadorTarefas.Api.Controllers
                 var result = await _mediator.Send(new ObterTarefaPorIdQuery(id));
                 return Ok(result);
             }
+            catch (CustomException ex)
+            {
+                return NotFound(new { mensagem = ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter a tarefa");
@@ -117,6 +123,10 @@ namespace GerenciadorTarefas.Api.Controllers
                 var result = await _mediator.Send(request);
                 return Ok(result);
             }
+            catch (CustomException ex)
+            {
+                return NotFound(new { mensagem = ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao atualizar a tarefa");
@@ -135,11 +145,15 @@ namespace GerenciadorTarefas.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Deleta uma tarefa existente", Description = "Deleta uma tarefa existente com o ID fornecido")]
         public async Task<IActionResult> DeletarTarefa(int id)
-        {   
+        {
             try
             {
                 var result = await _mediator.Send(new DeletarTarefaRequest { Id = id });
                 return Ok(result);
+            }
+            catch (CustomException ex)
+            {
+                return NotFound(new { mensagem = ex.Message });
             }
             catch (Exception ex)
             {

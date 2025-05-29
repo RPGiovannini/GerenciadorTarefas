@@ -2,6 +2,8 @@ using MediatR;
 using GerenciadorTarefas.Domain.Interfaces;
 using GerenciadorTarefas.Domain.Interfaces.Repository;
 using Microsoft.Extensions.Logging;
+using GerenciadorTarefas.Domain.Exceptions;
+using System.Net;
 namespace GerenciadorTarefas.Application.Tarefas.Requests.AtualizarTarefa
 {
     public class AtualizarTarefaRequestHandler : IRequestHandler<AtualizarTarefaRequest, int>
@@ -21,7 +23,7 @@ namespace GerenciadorTarefas.Application.Tarefas.Requests.AtualizarTarefa
                 if (tarefa == null)
                 {
                     _logger.LogError($"Tarefa {request.Id} não encontrada");
-                    throw new InvalidOperationException($"Tarefa {request.Id} não encontrada");
+                    throw new CustomException(HttpStatusCode.NotFound, $"Tarefa {request.Id} não encontrada", new HttpRequestException());
                 }
                 tarefa.Titulo = request.Titulo;
                 tarefa.Descricao = request.Descricao;
