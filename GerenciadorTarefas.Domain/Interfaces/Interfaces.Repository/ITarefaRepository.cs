@@ -8,7 +8,7 @@ namespace GerenciadorTarefas.Domain.Interfaces.Repository
         Task<IEnumerable<Tarefa>> GetAllAsync();
         Task<int> AddAsync(Tarefa tarefa);
         Task<bool> UpdateAsync(Tarefa tarefa);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteAsync(Tarefa tarefa);
 
 
     }
