@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <UserSecretsId>01de9997-563b-485c-b0c0-82a93e9a9234</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11" />

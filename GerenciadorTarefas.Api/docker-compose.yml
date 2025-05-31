@@ -1,0 +1,15 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: sqlserver_container
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "TaskDb123!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+volumes:
+  sql_data:
+    driver: local
