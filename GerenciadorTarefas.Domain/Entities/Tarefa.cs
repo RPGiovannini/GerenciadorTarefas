@@ -28,15 +28,33 @@ namespace GerenciadorTarefas.Domain.Entities
         {
             Titulo = titulo;
             Descricao = descricao;
+
+            if (novoStatus == EStatusTarefa.Concluido && Status != EStatusTarefa.Concluido)
+            {
+                DataConclusao = DateTime.Now;
+            }
+
+            else if (novoStatus != EStatusTarefa.Concluido && Status == EStatusTarefa.Concluido)
+            {
+                ReabrirTarefa(novoStatus);
+            }
             DataConclusao = dataConclusao;
+
             Status = novoStatus;
         }
         public void ConcluirTarefa()
         {
-            if (Status == EStatusTarefa.Pendente)
-            {
-                Status = EStatusTarefa.Concluido;
-            }
+            Status = EStatusTarefa.Concluido;
+            DataConclusao = DateTime.Now;
+        }
+
+        public void ReabrirTarefa(EStatusTarefa novoStatus)
+        {
+            if (novoStatus == EStatusTarefa.Concluido)
+                throw new ArgumentException("Use o método ConcluirTarefa() para concluir uma tarefa");
+
+            Status = novoStatus;
+            DataConclusao = null;
         }
     }
 }

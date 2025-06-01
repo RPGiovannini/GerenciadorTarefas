@@ -1,0 +1,409 @@
+﻿<Window x:Class="GerenciadorTarefas.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GerenciadorTarefas.WPF"
+        mc:Ignorable="d"
+        Title="Gerenciador de Tarefas"
+        Height="700"
+        Width="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}"
+        Loaded="Window_Loaded">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{StaticResource PrimaryBrush}"
+                Padding="16">
+            <DockPanel>
+                <TextBlock Text="📋 Gerenciador de Tarefas"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+                <Button DockPanel.Dock="Right"
+                        Content="🔄 Atualizar"
+                        Command="{Binding CarregarTarefasCommand}"
+                        Background="Transparent"
+                        Foreground="White"
+                        BorderBrush="White"
+                        Padding="8,4"
+                        Margin="8,0,0,0"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1"
+              Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Lista de Tarefas -->
+            <Border Grid.Column="0"
+                    Background="White"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Lista de Tarefas"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,16"/>
+
+                    <!-- Filtros -->
+                    <Grid Grid.Row="1"
+                          Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Filtro por Status -->
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Margin="0,0,8,0">
+                            <TextBlock Text="Status:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <ComboBox Width="150"
+                                      SelectedIndex="{Binding FiltroStatusIndex}">
+                                <ComboBoxItem Content="Todos"/>
+                                <ComboBoxItem Content="Pendente"/>
+                                <ComboBoxItem Content="Em Andamento"/>
+                                <ComboBoxItem Content="Concluído"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Filtro por Data -->
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <TextBlock Text="Data:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <DatePicker SelectedDate="{Binding FiltroData}"
+                                        Width="150"/>
+                        </StackPanel>
+
+                        <!-- Botões -->
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal">
+                            <Button Content="🔍 Filtrar"
+                                    Command="{Binding FiltrarTarefasCommand}"
+                                    Background="{StaticResource PrimaryBrush}"
+                                    Foreground="White"
+                                    Padding="12,6"
+                                    BorderThickness="0"
+                                    Margin="0,0,8,0"/>
+
+                            <Button Content="🗑️ Limpar"
+                                    Command="{Binding LimparFiltrosCommand}"
+                                    Background="#E0E0E0"
+                                    Foreground="Black"
+                                    Padding="12,6"
+                                    BorderThickness="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding Tarefas}"
+                              SelectedItem="{Binding TarefaSelecionada}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              AlternatingRowBackground="#F9F9F9">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID"
+                                                Binding="{Binding Id}"
+                                                Width="60"/>
+                            <DataGridTextColumn Header="Título"
+                                                Binding="{Binding Titulo}"
+                                                Width="*"/>
+                            <DataGridTextColumn Header="Descrição"
+                                                Binding="{Binding Descricao}"
+                                                Width="2*"/>
+                            <DataGridTextColumn Header="Status"
+                                                Binding="{Binding Status}"
+                                                Width="120"/>
+                            <DataGridTextColumn Header="Data Criação"
+                                                Binding="{Binding DataCriacao, StringFormat=dd/MM/yyyy}"
+                                                Width="120"/>
+                            <DataGridTextColumn Header="Data Conclusão"
+                                                Binding="{Binding DataConclusao, StringFormat=dd/MM/yyyy}"
+                                                Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Row="3"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,16,0,0">
+                        <Button Content="✏️ Atualizar"
+                                Command="{Binding AtualizarTarefaCommand}"
+                                Background="{StaticResource PrimaryBrush}"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="12,6"
+                                Margin="0,0,8,0"/>
+                        <Button Content="✅ Concluir"
+                                Command="{Binding ConcluirTarefaCommand}"
+                                Background="{StaticResource AccentBrush}"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="12,6"
+                                Margin="0,0,8,0"/>
+                        <Button Content="🗑️ Deletar"
+                                Command="{Binding DeletarTarefaCommand}"
+                                Background="#F44336"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="12,6"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Formulário Nova Tarefa -->
+            <Border Grid.Column="2"
+                    Background="White"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Nova Tarefa"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,16"/>
+
+                    <TextBox Grid.Row="1"
+                             Text="{Binding NovoTitulo, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,12"
+                             Padding="8"
+                             BorderBrush="#CCCCCC">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="Text"
+                                             Value="">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <VisualBrush AlignmentX="Left"
+                                                             AlignmentY="Center"
+                                                             Stretch="None">
+                                                    <VisualBrush.Visual>
+                                                        <TextBlock Text="Título da tarefa"
+                                                                   Foreground="#999999"
+                                                                   Margin="8,0,0,0"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <TextBox Grid.Row="2"
+                             Text="{Binding NovaDescricao, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,12"
+                             Padding="8"
+                             BorderBrush="#CCCCCC"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinLines="3"
+                             MaxLines="5">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="Text"
+                                             Value="">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <VisualBrush AlignmentX="Left"
+                                                             AlignmentY="Top"
+                                                             Stretch="None">
+                                                    <VisualBrush.Visual>
+                                                        <TextBlock Text="Descrição (opcional)"
+                                                                   Foreground="#999999"
+                                                                   Margin="8,8,0,0"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <ComboBox Grid.Row="3"
+                              SelectedIndex="{Binding NovoStatusIndex}"
+                              Margin="0,0,0,16"
+                              Padding="8"
+                              BorderBrush="#CCCCCC">
+                        <ComboBoxItem Content="Pendente"/>
+                        <ComboBoxItem Content="Em Andamento"/>
+                        <ComboBoxItem Content="Concluído"/>
+                    </ComboBox>
+
+                    <Button Grid.Row="4"
+                            Content="➕ Criar Tarefa"
+                            Command="{Binding CriarTarefaCommand}"
+                            Background="{StaticResource PrimaryBrush}"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="12,8"
+                            FontWeight="SemiBold"
+                            HorizontalAlignment="Stretch"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2"
+                Background="#37474F"
+                Padding="16,8">
+            <DockPanel>
+                <ProgressBar DockPanel.Dock="Left"
+                             IsIndeterminate="{Binding IsLoading}"
+                             Height="16"
+                             Width="100"
+                             Margin="0,0,16,0">
+                    <ProgressBar.Style>
+                        <Style TargetType="ProgressBar">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoading}"
+                                             Value="False">
+                                    <Setter Property="Visibility"
+                                            Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ProgressBar.Style>
+                </ProgressBar>
+                <TextBlock Text="{Binding MensagemStatus}"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Popup de Edição de Tarefa -->
+        <Border x:Name="EditarTarefaPopup"
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Visibility="{Binding EditarTarefaVisibility}"
+                Background="#80000000"
+                Panel.ZIndex="999">
+            <Border Width="400"
+                    Background="White"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Editar Tarefa"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,16"/>
+
+                    <TextBlock Grid.Row="1"
+                               Text="Título:"
+                               Margin="0,0,0,4"/>
+
+                    <TextBox Grid.Row="2"
+                             Text="{Binding TarefaEdicao.Titulo, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,12"
+                             Padding="8"
+                             BorderBrush="#CCCCCC"/>
+
+                    <TextBlock Grid.Row="3"
+                               Text="Descrição:"
+                               Margin="0,0,0,4"/>
+
+                    <TextBox Grid.Row="4"
+                             Text="{Binding TarefaEdicao.Descricao, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,12"
+                             Padding="8"
+                             BorderBrush="#CCCCCC"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinLines="3"
+                             MaxLines="5"/>
+
+                    <ComboBox Grid.Row="5"
+                              SelectedIndex="{Binding StatusEdicaoIndex}"
+                              Margin="0,0,0,16"
+                              Padding="8"
+                              BorderBrush="#CCCCCC">
+                        <ComboBoxItem Content="Pendente"/>
+                        <ComboBoxItem Content="Em Andamento"/>
+                        <ComboBoxItem Content="Concluído"/>
+                    </ComboBox>
+
+                    <StackPanel Grid.Row="6"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Content="Cancelar"
+                                Command="{Binding CancelarEdicaoCommand}"
+                                Background="#E0E0E0"
+                                Foreground="Black"
+                                BorderThickness="0"
+                                Padding="12,8"
+                                Margin="0,0,8,0"/>
+                        <Button Content="Salvar"
+                                Command="{Binding SalvarEdicaoCommand}"
+                                Background="{StaticResource PrimaryBrush}"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="12,8"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

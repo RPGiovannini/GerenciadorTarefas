@@ -4,6 +4,7 @@ using GerenciadorTarefas.Domain.Interfaces.Repository;
 using Microsoft.Extensions.Logging;
 using GerenciadorTarefas.Domain.Exceptions;
 using System.Net;
+using GerenciadorTarefas.Domain.Enums;
 namespace GerenciadorTarefas.Application.Tarefas.Requests.AtualizarTarefa
 {
     public class AtualizarTarefaRequestHandler : IRequestHandler<AtualizarTarefaRequest, int>
@@ -19,19 +20,19 @@ namespace GerenciadorTarefas.Application.Tarefas.Requests.AtualizarTarefa
         {
             try
             {
-                var tarefa = await _unitOfWork.TarefaRepository.GetByIdAsync(request.Id);
+                var tarefa = await _unitOfWork.TarefaRepository.GetByIdAsync(request.Id.Value);
                 if (tarefa == null)
                 {
                     _logger.LogError($"Tarefa {request.Id} não encontrada");
                     throw new CustomException(HttpStatusCode.NotFound, $"Tarefa {request.Id} não encontrada", new HttpRequestException());
                 }
-                tarefa.Titulo = request.Titulo;
-                tarefa.Descricao = request.Descricao;
-                tarefa.DataCriacao = request.DataCriacao;
-                tarefa.DataConclusao = request.DataConclusao;
-                tarefa.Status = request.Status;
+
+                tarefa.AtualizarTarefa(request.Titulo, request.Descricao, request.DataConclusao, request.Status);
+
                 await _unitOfWork.TarefaRepository.UpdateAsync(tarefa);
                 await _unitOfWork.Commit();
+
+                _logger.LogInformation($"Tarefa {tarefa.Id} atualizada com sucesso");
                 return tarefa.Id;
             }
             catch (Exception ex)
