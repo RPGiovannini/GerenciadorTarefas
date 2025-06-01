@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using GerenciadorTarefas.WPF.Enums;
 using GerenciadorTarefas.WPF.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GerenciadorTarefas.WPF.Services
 {
@@ -20,6 +22,55 @@ namespace GerenciadorTarefas.WPF.Services
             _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         }
 
+        private async Task<string> ProcessarErroResponseAsync(HttpResponseMessage response)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+
+            // Se for BadRequest (400), tentar extrair apenas a mensagem principal
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                try
+                {
+                    var errorJson = JObject.Parse(errorContent);
+
+                    // Tentar extrair o título ou mensagem principal
+                    var titulo = errorJson["Titulo"]?.ToString();
+                    if (!string.IsNullOrEmpty(titulo))
+                    {
+                        return titulo;
+                    }
+
+                    // Se não houver título, tentar extrair a primeira mensagem de erro
+                    var errors = errorJson["errors"];
+                    if (errors != null)
+                    {
+                        var firstError = errors.First;
+                        if (firstError is JProperty prop && prop.Value is JArray array && array.Count > 0)
+                        {
+                            return array[0].ToString();
+                        }
+                    }
+
+                    // Se houver uma mensagem direta
+                    var message = errorJson["message"]?.ToString();
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        return message;
+                    }
+                }
+                catch
+                {
+                    // Se não conseguir parsear o JSON, retornar mensagem padrão
+                    return "Dados inválidos. Verifique as informações e tente novamente.";
+                }
+
+                return "Dados inválidos. Verifique as informações e tente novamente.";
+            }
+
+            // Para outros tipos de erro, retornar o conteúdo completo
+            return errorContent;
+        }
+
         public async Task<List<TarefaModel>> ObterTarefasAsync()
         {
             try
@@ -28,8 +79,8 @@ namespace GerenciadorTarefas.WPF.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorContent}");
+                    var errorMessage = await ProcessarErroResponseAsync(response);
+                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorMessage}");
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -51,8 +102,8 @@ namespace GerenciadorTarefas.WPF.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorContent}");
+                    var errorMessage = await ProcessarErroResponseAsync(response);
+                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorMessage}");
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -95,8 +146,8 @@ namespace GerenciadorTarefas.WPF.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorContent}");
+                    var errorMessage = await ProcessarErroResponseAsync(response);
+                    throw new Exception($"Erro ao criar tarefa: {errorMessage}");
                 }
 
                 // A API retorna apenas o ID, então fazemos uma nova requisição para obter a tarefa completa
@@ -139,8 +190,8 @@ namespace GerenciadorTarefas.WPF.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorContent}");
+                    var errorMessage = await ProcessarErroResponseAsync(response);
+                    throw new Exception($"Erro ao atualizar tarefa: {errorMessage}");
                 }
 
                 // A API retorna apenas o ID, então fazemos uma nova requisição para obter a tarefa completa
@@ -166,8 +217,8 @@ namespace GerenciadorTarefas.WPF.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorContent}");
+                    var errorMessage = await ProcessarErroResponseAsync(response);
+                    throw new Exception($"Erro HTTP {response.StatusCode}: {errorMessage}");
                 }
 
                 return true;

@@ -19,6 +19,8 @@ namespace GerenciadorTarefas.WPF.ViewModels
         [ObservableProperty]
         private ObservableCollection<TarefaModel> tarefas = new();
 
+        private ObservableCollection<TarefaModel> _todasTarefas = new();
+
         [ObservableProperty]
         private TarefaModel? tarefaSelecionada;
 
@@ -39,6 +41,12 @@ namespace GerenciadorTarefas.WPF.ViewModels
 
         [ObservableProperty]
         private Visibility editarTarefaVisibility = Visibility.Collapsed;
+
+        [ObservableProperty]
+        private int filtroStatusIndex = 0; // 0 = Todos
+
+        [ObservableProperty]
+        private DateTime? filtroData;
 
         public ETarefaStatus NovoStatus => (ETarefaStatus)(NovoStatusIndex + 1);
 
@@ -67,11 +75,16 @@ namespace GerenciadorTarefas.WPF.ViewModels
 
                 var tarefasApi = await _tarefaService.ObterTarefasAsync();
 
+                _todasTarefas.Clear();
                 Tarefas.Clear();
                 foreach (var tarefa in tarefasApi)
                 {
+                    _todasTarefas.Add(tarefa);
                     Tarefas.Add(tarefa);
                 }
+
+                // Aplicar filtros após carregar
+                AplicarFiltros();
 
                 MensagemStatus = $"{Tarefas.Count} tarefa(s) carregada(s)";
             }
@@ -112,7 +125,10 @@ namespace GerenciadorTarefas.WPF.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Criando tarefa com Status: {novaTarefa.Status} ({(int)novaTarefa.Status})");
 
                 var tarefaCriada = await _tarefaService.CriarTarefaAsync(novaTarefa);
-                Tarefas.Add(tarefaCriada);
+                _todasTarefas.Add(tarefaCriada);
+
+                // Reaplicar filtros para mostrar a nova tarefa se ela atender aos critérios
+                AplicarFiltros();
 
                 // Limpar campos
                 NovoTitulo = string.Empty;
@@ -190,12 +206,15 @@ namespace GerenciadorTarefas.WPF.ViewModels
 
                 var tarefaAtualizada = await _tarefaService.AtualizarTarefaAsync(TarefaEdicao);
 
-                // Atualizar a tarefa na lista
-                var index = Tarefas.IndexOf(Tarefas.FirstOrDefault(t => t.Id == tarefaAtualizada.Id));
-                if (index >= 0)
+                // Atualizar a tarefa na lista completa
+                var indexCompleto = _todasTarefas.ToList().FindIndex(t => t.Id == tarefaAtualizada.Id);
+                if (indexCompleto >= 0)
                 {
-                    Tarefas[index] = tarefaAtualizada;
+                    _todasTarefas[indexCompleto] = tarefaAtualizada;
                 }
+
+                // Reaplicar filtros
+                AplicarFiltros();
 
                 // Fechar o popup
                 EditarTarefaVisibility = Visibility.Collapsed;
@@ -243,8 +262,11 @@ namespace GerenciadorTarefas.WPF.ViewModels
                 MensagemStatus = "Deletando tarefa...";
 
                 await _tarefaService.DeletarTarefaAsync(TarefaSelecionada.Id);
-                Tarefas.Remove(TarefaSelecionada);
+                _todasTarefas.Remove(_todasTarefas.FirstOrDefault(t => t.Id == TarefaSelecionada.Id));
                 TarefaSelecionada = null;
+
+                // Reaplicar filtros
+                AplicarFiltros();
 
                 MensagemStatus = "Tarefa deletada com sucesso!";
             }
@@ -280,11 +302,15 @@ namespace GerenciadorTarefas.WPF.ViewModels
                 // Atualizar na API
                 var tarefaAtualizada = await _tarefaService.AtualizarTarefaAsync(TarefaSelecionada);
 
-                var index = Tarefas.IndexOf(TarefaSelecionada);
-                if (index >= 0)
+                // Atualizar na lista completa
+                var indexCompleto = _todasTarefas.ToList().FindIndex(t => t.Id == TarefaSelecionada.Id);
+                if (indexCompleto >= 0)
                 {
-                    Tarefas[index] = tarefaAtualizada;
+                    _todasTarefas[indexCompleto] = tarefaAtualizada;
                 }
+
+                // Reaplicar filtros
+                AplicarFiltros();
 
                 MensagemStatus = "Tarefa concluída com sucesso!";
             }
@@ -297,6 +323,50 @@ namespace GerenciadorTarefas.WPF.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        private void FiltrarTarefas()
+        {
+            AplicarFiltros();
+        }
+
+        [RelayCommand]
+        private void LimparFiltros()
+        {
+            FiltroStatusIndex = 0;
+            FiltroData = null;
+            AplicarFiltros();
+        }
+
+        private void AplicarFiltros()
+        {
+            var tarefasFiltradas = _todasTarefas.AsEnumerable();
+
+            // Filtro por Status
+            if (FiltroStatusIndex > 0) // 0 = Todos
+            {
+                var statusFiltro = (ETarefaStatus)FiltroStatusIndex;
+                tarefasFiltradas = tarefasFiltradas.Where(t => t.Status == statusFiltro);
+            }
+
+            // Filtro por Data
+            if (FiltroData.HasValue)
+            {
+                var dataFiltro = FiltroData.Value.Date;
+                tarefasFiltradas = tarefasFiltradas.Where(t =>
+                    t.DataCriacao.Date == dataFiltro ||
+                    (t.DataConclusao.HasValue && t.DataConclusao.Value.Date == dataFiltro));
+            }
+
+            // Atualizar a coleção de tarefas
+            Tarefas.Clear();
+            foreach (var tarefa in tarefasFiltradas)
+            {
+                Tarefas.Add(tarefa);
+            }
+
+            MensagemStatus = $"{Tarefas.Count} tarefa(s) encontrada(s)";
         }
 
         public async Task InicializarAsync()

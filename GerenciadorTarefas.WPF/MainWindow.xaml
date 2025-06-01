@@ -59,6 +59,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
@@ -69,7 +70,62 @@
                                FontWeight="SemiBold"
                                Margin="0,0,0,16"/>
 
-                    <DataGrid Grid.Row="1"
+                    <!-- Filtros -->
+                    <Grid Grid.Row="1"
+                          Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Filtro por Status -->
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Margin="0,0,8,0">
+                            <TextBlock Text="Status:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <ComboBox Width="150"
+                                      SelectedIndex="{Binding FiltroStatusIndex}">
+                                <ComboBoxItem Content="Todos"/>
+                                <ComboBoxItem Content="Pendente"/>
+                                <ComboBoxItem Content="Em Andamento"/>
+                                <ComboBoxItem Content="Concluído"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Filtro por Data -->
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <TextBlock Text="Data:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <DatePicker SelectedDate="{Binding FiltroData}"
+                                        Width="150"/>
+                        </StackPanel>
+
+                        <!-- Botões -->
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal">
+                            <Button Content="🔍 Filtrar"
+                                    Command="{Binding FiltrarTarefasCommand}"
+                                    Background="{StaticResource PrimaryBrush}"
+                                    Foreground="White"
+                                    Padding="12,6"
+                                    BorderThickness="0"
+                                    Margin="0,0,8,0"/>
+
+                            <Button Content="🗑️ Limpar"
+                                    Command="{Binding LimparFiltrosCommand}"
+                                    Background="#E0E0E0"
+                                    Foreground="Black"
+                                    Padding="12,6"
+                                    BorderThickness="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <DataGrid Grid.Row="2"
                               ItemsSource="{Binding Tarefas}"
                               SelectedItem="{Binding TarefaSelecionada}"
                               AutoGenerateColumns="False"
@@ -86,6 +142,9 @@
                             <DataGridTextColumn Header="Título"
                                                 Binding="{Binding Titulo}"
                                                 Width="*"/>
+                            <DataGridTextColumn Header="Descrição"
+                                                Binding="{Binding Descricao}"
+                                                Width="2*"/>
                             <DataGridTextColumn Header="Status"
                                                 Binding="{Binding Status}"
                                                 Width="120"/>
@@ -98,7 +157,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <StackPanel Grid.Row="2"
+                    <StackPanel Grid.Row="3"
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 Margin="0,16,0,0">

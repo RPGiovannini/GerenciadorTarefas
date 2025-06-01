@@ -21,6 +21,7 @@ namespace GerenciadorTarefas.Application.Tarefas.Requests.CriarTarefa
                 var tarefa = new Tarefa(request.Titulo, request.Descricao, request.DataInicio, request.DataFim, request.Status);
                 await _unitOfWork.TarefaRepository.AddAsync(tarefa);
                 await _unitOfWork.Commit();
+                _logger.LogInformation($"Tarefa {tarefa.Id} criada com sucesso");
                 return tarefa.Id;
             }
             catch (Exception ex)
