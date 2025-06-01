@@ -1,6 +1,6 @@
-namespace GerenciadorTarefas.Domain.Enums
+namespace GerenciadorTarefas.WPF.Enums
 {
-    public enum EStatusTarefa
+    public enum ETarefaStatus
     {
         Pendente = 1,
         EmAndamento = 2,

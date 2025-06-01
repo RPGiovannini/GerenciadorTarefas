@@ -3,8 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GerenciadorTarefas.WPF.Enums;
 using GerenciadorTarefas.WPF.Models;
 using GerenciadorTarefas.WPF.Services;
 
@@ -27,9 +29,18 @@ namespace GerenciadorTarefas.WPF.ViewModels
         private string novaDescricao = string.Empty;
 
         [ObservableProperty]
-        private int novoStatusIndex = 0;  // Índice 0 = Pendente
+        private int novoStatusIndex = 0;
 
-        public StatusTarefa NovoStatus => (StatusTarefa)(NovoStatusIndex + 1);  // Mapear: 0->1, 1->2, 2->3
+        [ObservableProperty]
+        private TarefaModel tarefaEdicao = new();
+
+        [ObservableProperty]
+        private int statusEdicaoIndex = 0;
+
+        [ObservableProperty]
+        private Visibility editarTarefaVisibility = Visibility.Collapsed;
+
+        public ETarefaStatus NovoStatus => (ETarefaStatus)(NovoStatusIndex + 1);
 
         [ObservableProperty]
         private bool isLoading;
@@ -122,11 +133,44 @@ namespace GerenciadorTarefas.WPF.ViewModels
         }
 
         [RelayCommand]
-        private async Task AtualizarTarefaAsync()
+        private void AbrirEdicaoTarefa()
         {
             if (TarefaSelecionada == null)
             {
-                MessageBox.Show("Selecione uma tarefa para atualizar!", "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Selecione uma tarefa para editar!", "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Criar uma cópia da tarefa selecionada para edição
+            TarefaEdicao = new TarefaModel
+            {
+                Id = TarefaSelecionada.Id,
+                Titulo = TarefaSelecionada.Titulo,
+                Descricao = TarefaSelecionada.Descricao,
+                Status = TarefaSelecionada.Status,
+                DataCriacao = TarefaSelecionada.DataCriacao,
+                DataConclusao = TarefaSelecionada.DataConclusao
+            };
+
+            // Configurar o índice do status
+            StatusEdicaoIndex = (int)TarefaEdicao.Status - 1;
+
+            // Mostrar o popup de edição
+            EditarTarefaVisibility = Visibility.Visible;
+        }
+
+        [RelayCommand]
+        private void CancelarEdicao()
+        {
+            EditarTarefaVisibility = Visibility.Collapsed;
+        }
+
+        [RelayCommand]
+        private async Task SalvarEdicaoAsync()
+        {
+            if (string.IsNullOrWhiteSpace(TarefaEdicao.Titulo))
+            {
+                MessageBox.Show("O título é obrigatório!", "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -135,13 +179,26 @@ namespace GerenciadorTarefas.WPF.ViewModels
                 IsLoading = true;
                 MensagemStatus = "Atualizando tarefa...";
 
-                var tarefaAtualizada = await _tarefaService.AtualizarTarefaAsync(TarefaSelecionada);
+                // Atualizar o status baseado no índice selecionado
+                TarefaEdicao.Status = (ETarefaStatus)(StatusEdicaoIndex + 1);
 
-                var index = Tarefas.IndexOf(TarefaSelecionada);
+                // Se o status for Concluído e não tiver data de conclusão, definir para agora
+                if (TarefaEdicao.Status == ETarefaStatus.Concluido && !TarefaEdicao.DataConclusao.HasValue)
+                {
+                    TarefaEdicao.DataConclusao = DateTime.Now;
+                }
+
+                var tarefaAtualizada = await _tarefaService.AtualizarTarefaAsync(TarefaEdicao);
+
+                // Atualizar a tarefa na lista
+                var index = Tarefas.IndexOf(Tarefas.FirstOrDefault(t => t.Id == tarefaAtualizada.Id));
                 if (index >= 0)
                 {
                     Tarefas[index] = tarefaAtualizada;
                 }
+
+                // Fechar o popup
+                EditarTarefaVisibility = Visibility.Collapsed;
 
                 MensagemStatus = "Tarefa atualizada com sucesso!";
             }
@@ -154,6 +211,12 @@ namespace GerenciadorTarefas.WPF.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        private async Task AtualizarTarefaAsync()
+        {
+            AbrirEdicaoTarefa();
         }
 
         [RelayCommand]
@@ -211,7 +274,7 @@ namespace GerenciadorTarefas.WPF.ViewModels
                 MensagemStatus = "Concluindo tarefa...";
 
                 // Definir status e data de conclusão
-                TarefaSelecionada.Status = StatusTarefa.Concluido;
+                TarefaSelecionada.Status = ETarefaStatus.Concluido;
                 TarefaSelecionada.DataConclusao = DateTime.Now.AddMinutes(1);
 
                 // Atualizar na API

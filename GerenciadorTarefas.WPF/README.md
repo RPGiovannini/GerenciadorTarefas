@@ -84,7 +84,6 @@ GerenciadorTarefas.WPF/
 ├── Services/
 │   └── TarefaService.cs        # Serviço para comunicação com API
 ├── Views/
-│   └── (futuras views)
 ├── MainWindow.xaml             # Interface principal
 ├── MainWindow.xaml.cs          # Code-behind
 ├── App.xaml                    # Configuração da aplicação

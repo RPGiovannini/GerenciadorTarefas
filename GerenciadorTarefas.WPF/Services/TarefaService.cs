@@ -3,20 +3,12 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using GerenciadorTarefas.WPF.Enums;
 using GerenciadorTarefas.WPF.Models;
 using Newtonsoft.Json;
 
 namespace GerenciadorTarefas.WPF.Services
 {
-    public interface ITarefaService
-    {
-        Task<List<TarefaModel>> ObterTarefasAsync();
-        Task<TarefaModel> ObterTarefaPorIdAsync(int id);
-        Task<TarefaModel> CriarTarefaAsync(TarefaModel tarefa);
-        Task<TarefaModel> AtualizarTarefaAsync(TarefaModel tarefa);
-        Task<bool> DeletarTarefaAsync(int id);
-    }
-
     public class TarefaService : ITarefaService
     {
         private readonly HttpClient _httpClient;
@@ -87,7 +79,7 @@ namespace GerenciadorTarefas.WPF.Services
                     titulo = tarefa.Titulo,
                     descricao = tarefa.Descricao,
                     dataInicio = tarefa.DataCriacao,
-                    dataFim = tarefa.Status == StatusTarefa.Concluido ? (DateTime?)DateTime.Now.AddMinutes(1) : null,
+                    dataFim = tarefa.Status == ETarefaStatus.Concluido ? (DateTime?)DateTime.Now.AddMinutes(1) : null,
                     status = statusValue
                 };
 
@@ -128,7 +120,7 @@ namespace GerenciadorTarefas.WPF.Services
             {
                 // Se o status for Concluído e não tiver data de conclusão, definir como agora + 1 minuto
                 var dataConclusao = tarefa.DataConclusao;
-                if (tarefa.Status == StatusTarefa.Concluido && dataConclusao == null)
+                if (tarefa.Status == ETarefaStatus.Concluido && dataConclusao == null)
                 {
                     dataConclusao = DateTime.Now.AddMinutes(1);
                 }

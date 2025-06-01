@@ -25,11 +25,7 @@ namespace GerenciadorTarefas.Application.Tarefas.Requests.AtualizarTarefa
                     _logger.LogError($"Tarefa {request.Id} não encontrada");
                     throw new CustomException(HttpStatusCode.NotFound, $"Tarefa {request.Id} não encontrada", new HttpRequestException());
                 }
-                tarefa.Titulo = request.Titulo;
-                tarefa.Descricao = request.Descricao;
-                tarefa.DataCriacao = request.DataCriacao;
-                tarefa.DataConclusao = request.DataConclusao;
-                tarefa.Status = request.Status;
+                tarefa.AtualizarTarefa(request.Titulo, request.Descricao, request.DataConclusao, request.Status);
                 await _unitOfWork.TarefaRepository.UpdateAsync(tarefa);
                 await _unitOfWork.Commit();
                 return tarefa.Id;

@@ -261,5 +261,90 @@
                            VerticalAlignment="Center"/>
             </DockPanel>
         </Border>
+
+        <!-- Popup de Edição de Tarefa -->
+        <Border x:Name="EditarTarefaPopup"
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Visibility="{Binding EditarTarefaVisibility}"
+                Background="#80000000"
+                Panel.ZIndex="999">
+            <Border Width="400"
+                    Background="White"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Editar Tarefa"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,16"/>
+
+                    <TextBlock Grid.Row="1"
+                               Text="Título:"
+                               Margin="0,0,0,4"/>
+
+                    <TextBox Grid.Row="2"
+                             Text="{Binding TarefaEdicao.Titulo, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,12"
+                             Padding="8"
+                             BorderBrush="#CCCCCC"/>
+
+                    <TextBlock Grid.Row="3"
+                               Text="Descrição:"
+                               Margin="0,0,0,4"/>
+
+                    <TextBox Grid.Row="4"
+                             Text="{Binding TarefaEdicao.Descricao, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,12"
+                             Padding="8"
+                             BorderBrush="#CCCCCC"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinLines="3"
+                             MaxLines="5"/>
+
+                    <ComboBox Grid.Row="5"
+                              SelectedIndex="{Binding StatusEdicaoIndex}"
+                              Margin="0,0,0,16"
+                              Padding="8"
+                              BorderBrush="#CCCCCC">
+                        <ComboBoxItem Content="Pendente"/>
+                        <ComboBoxItem Content="Em Andamento"/>
+                        <ComboBoxItem Content="Concluído"/>
+                    </ComboBox>
+
+                    <StackPanel Grid.Row="6"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Content="Cancelar"
+                                Command="{Binding CancelarEdicaoCommand}"
+                                Background="#E0E0E0"
+                                Foreground="Black"
+                                BorderThickness="0"
+                                Padding="12,8"
+                                Margin="0,0,8,0"/>
+                        <Button Content="Salvar"
+                                Command="{Binding SalvarEdicaoCommand}"
+                                Background="{StaticResource PrimaryBrush}"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="12,8"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
     </Grid>
 </Window>
