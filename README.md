@@ -53,14 +53,9 @@ O projeto segue uma arquitetura em camadas:
 
 Para aplicar as migrações do banco de dados, execute os seguintes comandos no terminal:
 
-1. Navegue até a pasta do projeto API
+1. Execute o comando para aplicar as migrações
 ```
-cd GerenciadorTarefas.Api
-```
-
-2. Execute o comando para aplicar as migrações
-```
-dotnet ef database update
+dotnet ef database update -p GerenciadorTarefas.Infrastructure -s GerenciadorTarefas.Api
 ```
 
 ## Como Executar o Projeto
